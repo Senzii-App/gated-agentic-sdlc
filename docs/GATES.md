@@ -15,7 +15,7 @@
 
 | Area | Mode | Mechanism |
 |---|---|---|
-| Tenancy, identity, auth, session, `run_sql` | **E3** — controls the agent cannot edit | AuthZ matrix tests locked at g3 and immutable within the unit; CI greps the invariant (no `org_id`-bearing tool-arg fields; org scope enters queries only from the identity layer; `TenantContext` unforgeable per [ADR-0001](adr/0001-typescript-rebuild.md)); green = runner output on the real harness |
+| Tenancy, identity, auth, session, `run_sql`, magic-link issuance | **E3** — controls the agent cannot edit | AuthZ matrix tests locked at g3 and immutable within the unit; CI greps the invariant (no `org_id`-bearing tool-arg fields; org scope enters queries only from the identity layer; `TenantContext` unforgeable per [ADR-0001](adr/0001-typescript-rebuild.md)); manifest parity check (registry vs. manifest — 28 tools, descriptions authoritative); green = runner output on the real harness |
 | Domain logic (matching / assignments / requests / staff / metrics) | **E3-lite** | Runner-verified green; immutable per-unit test lists; human merge |
 | Docs, CI drafts, tooling | **E2** | Front-loaded structure; constitution-as-checked-doc; human merge |
 
@@ -29,6 +29,10 @@ Mode selection rule: **mode follows blast radius** (see METHODOLOGY §4). A team
 | Tenancy core (identity injection, per-message binding, `TenantContext` type design) | **A3-design / human-gated** | Design ADR mandatory; compile-negative type test in the locked suite; security review at g4 |
 | Org metrics (read-only) | A1 | g4 human merge |
 | Matching (read-only) | A1 | g4 human merge |
+| Work sites (list/create) | A1 | g4 human merge |
+| Clients (list/create) | A1 | g4 human merge |
+| Certifications (idempotent create at A1; update/delete cascade at **A2**) | A1/A2 | delete cascade: tests locked first; security-relevant review at g4 |
+| Magic-link senders (identity issuance) | **A3** | E3: locked issuance-matrix tests; audit assertions; non-guessable tokens; security review at g4 |
 | Assignments lifecycle (writes; conflict + certification gates) | **A2** | Tests locked first; security-relevant review at g4 |
 | Staff lifecycle (writes) | A2 | as above |
 | Requests lifecycle | A2 | as above |
