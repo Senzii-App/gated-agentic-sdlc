@@ -23,12 +23,23 @@ export interface ProvisionedPostgres {
 }
 
 export async function provisionPostgres(): Promise<ProvisionedPostgres> {
+  // Pick a free port at bind time so parallel suites can never collide.
+  const net = await import('node:net');
+  const freePort: number = await new Promise((resolvePort, rejectPort) => {
+    const probe = net.createServer();
+    probe.listen(0, '127.0.0.1', () => {
+      const address = probe.address();
+      const port = address !== null && typeof address === 'object' ? address.port : 5433;
+      probe.close(() => resolvePort(port));
+    });
+    probe.on('error', rejectPort);
+  });
   const dataDir = path.join(process.cwd(), '.pgdata-test-' + randomUUID().slice(0, 8));
   const pg = new EmbeddedPostgres({
     'databaseDir': dataDir,
     'user': 'postgres',
     'password': 'postgres',
-    'port': 5433,
+    'port': freePort,
     'persistent': false
   });
   try {
@@ -39,7 +50,7 @@ export async function provisionPostgres(): Promise<ProvisionedPostgres> {
   await pg.start();
   return {
     host: '127.0.0.1',
-    port: 5433,
+    port: freePort,
     close: async () => {
       await pg.stop();
     }
@@ -50,6 +61,8 @@ export interface McpRig {
   readonly baseUrl: string;
   readonly secret: string;
   admin(): Promise<Client>;
+  /** A client connected to the rig's branch database (test data plane). */
+  db(): Promise<Client>;
   close(): Promise<void>;
 }
 
@@ -99,10 +112,18 @@ export async function startRig(): Promise<McpRig> {
   const started = await startServer(config, undefined);
   const baseUrl = `http://127.0.0.1:${started.port}`;
 
+  const dataClient = (): Promise<Client> =>
+    (async () => {
+      const c = new Client({ 'connectionString': branchUri });
+      await c.connect();
+      return c;
+    })();
+
   return {
     baseUrl,
     'secret': config['sessionSecret'],
     admin,
+    db: dataClient,
     close: async () => {
       await started.close();
       const cleaner = await admin();

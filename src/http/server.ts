@@ -8,9 +8,9 @@
  * - Stateful Streamable HTTP: session map per ADR-0003 §3; unknown or
  *   expired session ids are rejected per the SDK contract.
  */
-import { createServer, type IncomingMessage, type ServerResponse, type Server as HttpServer } from 'node:http';
+import { createServer, type ServerResponse, type Server as HttpServer } from 'node:http';
 import { randomUUID } from 'node:crypto';
-import { Server } from '@modelcontextprotocol/sdk/server/index.js';
+import type { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import type { Transport } from '@modelcontextprotocol/sdk/shared/transport.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import { loadRegistry, type Registry } from '../mcp/registry.js';

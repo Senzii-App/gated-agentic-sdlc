@@ -5,7 +5,7 @@
  */
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { loadRegistry } from '../src/mcp/registry.js';
-import { RawMcpClient, toolText, type RpcResponse } from './client.js';
+import { RawMcpClient, toolText } from './client.js';
 import { TOKEN_DEV_A, TOKEN_DEV_B, startRig, type McpRig } from './harness.js';
 
 let rig: McpRig;

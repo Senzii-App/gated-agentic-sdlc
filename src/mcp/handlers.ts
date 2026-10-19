@@ -3,7 +3,7 @@
  * SPEC-001 §3.1's progressive exposure means list_tools always reflects the
  * manifest (AC-22), while dispatch refuses tools whose unit has not landed.
  */
-import type { CallToolResult, Tool } from '@modelcontextprotocol/sdk/types.js';
+import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import type { TenantContext } from '../tenancy/tenant.js';
 import type { ToolListing } from './registry.js';
 

@@ -62,10 +62,10 @@ describe('T-2 per-message identity binding', () => {
 
   it('credential revocation takes effect on the very next message (api-key path)', async () => {
     const client = new RawMcpClient(rig.baseUrl);
-    const admin = await rig.admin();
+    const data = await rig.db();
     try {
       const probeKey = 'revocation-probe-key';
-      await admin.query(
+      await data.query(
         'INSERT INTO api_keys (key_hash, user_id, organization_id) VALUES ($1, 31, 1)',
         [sha256hex(probeKey)]
       );
@@ -75,7 +75,7 @@ describe('T-2 per-message identity binding', () => {
       const before = await echoOf(await client.callTool('identity.echo', {}, probeKey));
       expect(before?.org).toBe(1);
 
-      await admin.query(
+      await data.query(
         'UPDATE api_keys SET revoked_at = now() WHERE key_hash = $1',
         [sha256hex(probeKey)]
       );
@@ -83,7 +83,7 @@ describe('T-2 per-message identity binding', () => {
       const after = await echoOf(await client.callTool('identity.echo', {}, probeKey));
       expect(after).toBeNull();
     } finally {
-      await admin.end();
+      await data.end();
     }
   });
 
@@ -98,8 +98,10 @@ describe('T-2 per-message identity binding', () => {
     }
 
     const calls = clients.flatMap((client, index) => {
-      const token = index % 2 === 0 ? TOKEN_DEV_A : TOKEN_DEV_B;
-      return [{ client, token, expectedOrg: token === TOKEN_DEV_A ? 1 : 2 }];
+      return Array.from({ length: 12 }, (_, k) => {
+        const token = (index + k) % 2 === 0 ? TOKEN_DEV_A : TOKEN_DEV_B;
+        return { client, token, expectedOrg: token === TOKEN_DEV_A ? 1 : 2 };
+      });
     });
     const echoed = await Promise.all(
       calls.map(async ({ client, token, expectedOrg }) => ({

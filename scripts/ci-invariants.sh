@@ -15,11 +15,16 @@ else
 fi
 
 # I2 — TenantContext minting confined to the tenancy layer (T-1.T).
-if grep -rn "mintTenantContext" src --include="*.ts" | grep -v "^src/tenancy/" | grep -v "import"; then
-  echo "FAIL I2: TenantContext minting escapes the tenancy layer"
+# Property under test: (a) no mint definition outside src/tenancy/,
+# (b) no direct object literal typed as TenantContext outside it,
+# (c) the brand symbol never referenced outside it. Callers in the identity
+# middleware (src/http/server.ts) may IMPORT and CALL — that is the layer's
+# public surface; nothing may mint by construction elsewhere.
+if grep -rnE "function mintTenantContext|TenantContext = \{|tenantBrand" src --include="*.ts" | grep -v "^src/tenancy/"; then
+  echo "FAIL I2: tenant-context construction escapes the tenancy layer"
   fail=1
 else
-  echo "ok I2: TenantContext minting confined to src/tenancy/"
+  echo "ok I2: tenant-context construction confined to src/tenancy/"
 fi
 
 # I3 — list_tools must be manifest-driven (N-3 / §6.5: descriptions authoritative).

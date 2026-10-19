@@ -5,7 +5,7 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { readSessionSecret } from '../src/config.js';
 import { RawMcpClient, toolText, type RpcResponse } from './client.js';
-import { TOKEN_DEV_A, TOKEN_DEV_B, startRig, type McpRig } from './harness.js';
+import { TOKEN_DEV_A, startRig, type McpRig } from './harness.js';
 import { API_KEY_ORG_A, API_KEY_ORG_B } from './db.js';
 import { expiredExp, mintJwt, soonExp } from './jwt.js';
 
