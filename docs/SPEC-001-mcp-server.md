@@ -1,6 +1,6 @@
 # SPEC-001 — MCP Server (Milestone 1) — Governing Specification
 
-**v1.2 — re-frozen 2026-10-19 (gate g2, after Delta-02) — Christopher Ochsenreither**
+**v1.2 — re-frozen 2026-10-19 (gate g2, after Delta-03) — Christopher Ochsenreither**
 Status: FROZEN for M1 · Scope class: A2/A3 (tenancy & security spine inside)
 Delta log: §12 (deltas only via human re-plan; every delta cited here)
 
@@ -162,6 +162,14 @@ MCP-side roles: `admin` (default claim) and `super` (platform operators; `run_sq
 
 Deploy gate (per [`docs/GATES.md`](GATES.md)): all suites green on the real runner in the synthetic multi-tenant stack; N-5 typecheck gate green; g4 human merge recorded.
 
+## 10.1 Test storage contract (Delta-03)
+
+- **Real database, production engine.** Every suite that touches tenancy, identity, credentials, workflow, audit, or metrics runs against a **real PostgreSQL** — the engine the production MCP server actually uses (`asyncpg` connection pool verified in source, 2026-10-19). No in-memory store stands between the suites and the queries. T-1 is a *query-construction* property: an in-memory stand-in behind the repository interface can pass an authZ matrix the real SQL fails — which is precisely the bug class production shipped four times before the 2026-10-06 fixes. In-memory would make green dishonest.
+- **Provisioning, one harness / two factories.** CI (GitHub Actions) provisions Postgres via **Testcontainers** (Docker present on runners, engine version pinned). Local runs provision via an **embedded-Postgres binary** path (zero daemon required). Same tests, same assertions, identical green either way — the factory is a 20-line seam, the harness is the contract.
+- **Isolation: branched template databases.** A seeded template DB (core schema + two synthetic tenants, org A/B) is minted once per run; each test cuts a copy-on-write branch (`createdb -T` from template) and discards it after ("the branch is the fixture; disposal is the reset"). Transaction-rollback isolation alone is insufficient for the session-identity and credential suites — revocation/API-key lookup and session replay need durable, cross-connection state.
+- **Synthetic data only** — orgs, staff, shifts in fixtures are synthetic; no production rows, ever; issuance/audit assertions (N-2, AC-18) run against the seeded fixtures.
+- **DB-free suites:** type-level (compile, `tsc`), manifest-parity (filesystem), response-shape contract (fixture-driven, no storage).
+
 ## 11. Open register (design notes, not gaps)
 
 - Progressive exposure of the tool surface (start: metrics + matching + shift reads; write groups follow their units).
@@ -174,6 +182,7 @@ Deploy gate (per [`docs/GATES.md`](GATES.md)): all suites green on the real runn
 
 | Delta | Date | Change | Authority |
 |---|---|---|---|
+| **Delta-03** | 2026-10-19 | **Test storage contract** (§10.1 added; triggered by the human owner's test-infrastructure question): real **PostgreSQL** (production engine — `asyncpg` pool verified in source) for all tenancy/identity/credential/workflow/audit/metrics suites; Testcontainers in CI + embedded-Postgres locally behind one harness seam; per-test branched template DBs (copy-on-write; no rollback-only isolation for revocation/session-replay state); synthetic tenants only; DB-free suites enumerated (type-level, manifest-parity, response-shape contract). v1.2 (§ numbering unchanged; Delta log stays §12). | human re-plan (@ochsec) |
 | **Delta-02** | 2026-10-19 | **Conformance audit vs. production source** (first direct check of the original app; triggered by the human owner's completeness challenge): complete 28-tool manifest-parity inventory with exact production names (was: partial inventory; `matching.rank` → the real `find_candidates`); added work-sites, clients, magic-link, certification-update/delete tooling; corrected request lifecycle (**no MCP approve step** — acceptance is web-side); added soft-delete blocking conditions and matching weights (40/30/30) as requirements; **auth boundary made explicit (§2)** — SPEC-001 governs MCP transport identity; OAuth AS = ADR-0002; magic-link redemption + dashboard user-auth = web-app spec (M2.5); production credential reality documented (JWT-HMAC + revocable API keys, RFC 9728 discovery header, /health-only bypass); new §6.7 identity-issuance bar (magic-link senders; A3); §6.5 hardened to manifest-generated descriptions after a live docstring/manifest mismatch finding (`run_sql`: docstring "admin only" vs manifest super-gating); ACs extended (AC-7 matrix = all 28 tools; AC-16–22 added). v1.1 → v1.2. **Audit sources:** production `tools.toml` (349 L, 28 tools), `server.py` (261 L), `api_keys.py`, `config.py`, git history (`c84889f`, `85cad82` — upstream fixes landed 2026-10-06). | human re-plan (@ochsec) |
 | **Delta-01** | 2026-10-16 | Stack port: Rust/`rmcp` + Python client harness → TypeScript/Node (strict profile; `@modelcontextprotocol/sdk` 1.32.1; Hono; Eta SSR pages; Vitest + TS client harness); credential-adapter split (OAuth contract retained; M1 dev adapter); type-level tenancy added (T-1.T, AC-7.T); SSR pages dated M2 (+M2.5 audit/role flows). Reason: [ADR-0001](adr/0001-typescript-rebuild.md) — human decision (@ochsec). v1.0 → v1.1. | human re-plan (g2 re-freeze) |
 
