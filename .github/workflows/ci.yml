@@ -1,0 +1,29 @@
+name: gate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  unit-gates:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - name: Install
+        run: pnpm install --frozen-lockfile
+      - name: CI invariants (T-1 / N-3 greps)
+        run: bash scripts/ci-invariants.sh
+      - name: Lint
+        run: pnpm lint
+      - name: Typecheck (N-5 gate)
+        run: pnpm typecheck
+      - name: Suites (testcontainers postgres)
+        run: pnpm test:ci
+        env:
+          TEST_PROVISIONER: testcontainers
