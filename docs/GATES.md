@@ -15,7 +15,7 @@
 
 | Area | Mode | Mechanism |
 |---|---|---|
-| Tenancy, identity, auth, session, `run_sql` | **E3** — controls the agent cannot edit | AuthZ matrix tests locked at g3 and immutable within the unit; CI greps the invariant (no `org_id`-bearing tool-arg fields; org scope enters queries only from the identity layer); green = runner output on the real harness |
+| Tenancy, identity, auth, session, `run_sql` | **E3** — controls the agent cannot edit | AuthZ matrix tests locked at g3 and immutable within the unit; CI greps the invariant (no `org_id`-bearing tool-arg fields; org scope enters queries only from the identity layer; `TenantContext` unforgeable per [ADR-0001](adr/0001-typescript-rebuild.md)); green = runner output on the real harness |
 | Domain logic (matching / assignments / requests / staff / metrics) | **E3-lite** | Runner-verified green; immutable per-unit test lists; human merge |
 | Docs, CI drafts, tooling | **E2** | Front-loaded structure; constitution-as-checked-doc; human merge |
 
@@ -25,8 +25,8 @@ Mode selection rule: **mode follows blast radius** (see METHODOLOGY §4). A team
 
 | Unit | Tier | Gate handling |
 |---|---|---|
-| MCP server skeleton + transport + OAuth | A1 | g4 human merge |
-| Tenancy core (identity injection, per-message binding) | **A3-design / human-gated** | Design ADR mandatory; security review at g4; matrix tests locked first |
+| MCP server skeleton + transport + credential adapter interface | A1 | g4 human merge | Dev token adapter (synthetic tenants) acceptable at A1; production OAuth adapter is its own unit (ADR-0002) |
+| Tenancy core (identity injection, per-message binding, `TenantContext` type design) | **A3-design / human-gated** | Design ADR mandatory; compile-negative type test in the locked suite; security review at g4 |
 | Org metrics (read-only) | A1 | g4 human merge |
 | Matching (read-only) | A1 | g4 human merge |
 | Assignments lifecycle (writes; conflict + certification gates) | **A2** | Tests locked first; security-relevant review at g4 |

@@ -53,9 +53,15 @@ Gate: g3-tests-locked, g4-human-review
 
 ## Stack & milestones
 
-- **M1 (this build): MCP server** — Rust, `rmcp` v1.8 (MCP spec `2025-11-25`), Streamable HTTP, OAuth 2.1 + PKCE, stateful sessions. Mirrors the production Senzii MCP server. Test harness: Python MCP client `1.29.1` against a stateful `StreamableHTTPSessionManager` with simulated multi-tenant stacks.
-- **M2** — scheduling domain core + persistence.
-- **M3** — dashboard port.
+**Rebuilt in TypeScript / Node — a different language than the original, deliberately.** The spec, not the codebase, is the bridge between the two: whatever transfers, transfers by intent. Stack decision and the strict-typing profile: [docs/adr/0001](docs/adr/0001-typescript-rebuild.md).
+
+- Runtime: Node.js 22 LTS (ESM) · strict TypeScript (`strict` + `noUncheckedIndexedAccess` + `exactOptionalPropertyTypes`; `any` banned in CI)
+- MCP: official TypeScript SDK `@modelcontextprotocol/sdk` 1.32.1 — Streamable HTTP, stateful sessions
+- HTTP: Hono 4.x (typed routes) · Templates: Eta 4.x (auto-escape, typed contexts, server-rendered pages)
+- Tests: Vitest 5 + the SDK's MCP client against a simulated two-tenant environment (synthetic data only)
+
+Milestones: **M1** tenancy core + read-only tool surface (metrics, matching, shifts) → **M1.5** OAuth 2.1 + PKCE credential adapter → **M2** write surface (assignments/staff/requests) with the server-rendered pending→confirm flow → **M2.5** audit + per-role flows → **M3** full dashboard port.
+
 - [Original app](https://github.com/Senzii-App/app) · [Public site](https://github.com/Senzii-App/site) · [senzii.com](https://senzii.com)
 
 ## Data & secrets policy

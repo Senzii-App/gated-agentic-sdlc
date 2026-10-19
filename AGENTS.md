@@ -27,7 +27,7 @@ CHARTER─g1─ SPECIFY─g2─ PLAN─g3─ BUILD ⇄ steer ─g4─ GATE & MER
 ## Workflow rules
 
 - **Unit of work = one tool group**; one PR per unit; nothing merges without g4.
-- **Green is honest:** success = test-runner output on a real harness (Rust `cargo test` + the Python MCP client `1.29.1` harness on the stateful `StreamableHTTPSessionManager` with simulated tenants), never the agent's self-report.
+- **Green is honest:** success = test-runner output on a real harness (`tsc --noEmit` typecheck gate + Vitest on the simulated two-tenant stack, via the official TS MCP SDK client), never the agent's self-report.
 - **Every commit carries the trailers** defined in README (Spec / ACs / Tier / Author-Class / Gate). Missing trailers = invalid commit.
 - Blocked or spec looks wrong → **stop and ask**; do not improvise around a frozen spec.
 - Consequential decisions → ADR (`docs/adr/NNNN-title.md`).
@@ -39,6 +39,7 @@ CHARTER─g1─ SPECIFY─g2─ PLAN─g3─ BUILD ⇄ steer ─g4─ GATE & MER
 - Identity is resolved **per message** (request scope at call time), never bound at session creation; key revocation must take effect on the next request regardless of session age.
 - `run_sql`-class surfaces: absent by default; if ever, super-role only + READ ONLY transactions.
 - These areas are E3 (controls the agent cannot edit — locked authZ matrix, deterministic CI checks). Any work here ⇒ human review is **deterministic**, never model-decided.
+- **E3 in the type system:** `TenantContext` is branded and unforgeable outside `src/tenancy/identity.ts`; every repository/service function takes it as its first parameter; tool-argument types cannot contain it. T-1 is a compile-time property (see [ADR-0001](docs/adr/0001-typescript-rebuild.md)); greps are the secondary net, and the compile-negative test is part of the locked suite.
 
 ## Human-in-the-loop (product rule)
 
@@ -46,7 +47,7 @@ AI proposes; human approves. Assignments via MCP land `pending`; dashboard confi
 
 ## Stack (M1)
 
-Rust + `rmcp` v1.8 (MCP `2025-11-25`); Streamable HTTP; OAuth 2.1 + PKCE; stateful sessions. Test harness: Python MCP client `1.29.1` + stateful `StreamableHTTPSessionManager`, synthetic multi-tenant stacks.
+Node.js 22 LTS (ESM) + strict TypeScript per [ADR-0001](docs/adr/0001-typescript-rebuild.md): `strict`, `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, `verbatimModuleSyntax`; branded opaque domain IDs (`OrgId`, `StaffId`, `ShiftId`, `AssignmentId`, `CertificationId`); discriminated unions + exhaustive `switch`/`assertNever` for lifecycle states; parse-at-boundary (Zod) — the interior only ever sees validated branded types; `any` banned in CI. MCP: `@modelcontextprotocol/sdk` 1.32.1 (Streamable HTTP, stateful sessions). HTTP: Hono 4.x. Templates: Eta 4.x, auto-escape, typed contexts (M2+). Tests: Vitest 5 + the SDK's MCP client; harness = simulated two-tenant environment, synthetic data only.
 
 ## Context hygiene
 
