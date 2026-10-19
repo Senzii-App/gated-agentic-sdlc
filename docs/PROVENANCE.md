@@ -8,6 +8,7 @@ One row per commit that carries implementation diffs, plus a running scorecard. 
 |---|---|---|---|---|---|---|---|
 | 2026-10-16 | bootstrap series | charter + SPEC-001 + gate policy + ledger | SPEC-001 (g2 frozen) | — | human (charter/gates, drafted in agent steering) | g1, g2, g3-policy | no implementation code yet; matrix tests to follow |
 | 2026-10-16 | pivot commits | ADR-0001 (TypeScript/Node rebuild) + SPEC-001 v1.1 (Delta-01) + charter alignment | SPEC-001 v1.1 (g2 re-frozen) | — | human (decision: @ochsec; doc drafting in agent steering) | g1-decision, g2 | stack: TS strict profile; type-level tenancy added; OAuth adapter deferred via interface |
+| 2026-10-19 | conformance audit | SPEC-001 v1.2 (Delta-02): 28-tool manifest parity, auth boundary explicit, identity-issuance bar (magic links), production credential parity | SPEC-001 v1.2 (g2 re-frozen) | — | human (owner's completeness question triggered audit: @ochsec; sources: tools.toml, server.py, api_keys.py, config.py, git c84889f/85cad82) | g2 (re-frozen) | first direct source check of the original app; inventory corrected; spec coverage map added |
 
 ## Author-class vocabulary
 
