@@ -17,14 +17,19 @@ fi
 # I2 — TenantContext minting confined to the tenancy layer (T-1.T).
 # Property under test: (a) no mint definition outside src/tenancy/,
 # (b) no direct object literal typed as TenantContext outside it,
-# (c) the brand symbol never referenced outside it. Callers in the identity
-# middleware (src/http/server.ts) may IMPORT and CALL — that is the layer's
-# public surface; nothing may mint by construction elsewhere.
+# (c) the brand symbol never referenced outside it, and (d) mintTenantContext
+# is never CALLED outside src/tenancy/ — with src/http/server.ts (the identity
+# middleware) whitelisted as the sole allowed call site. The brand blocks
+# forgery-by-literal, not forgery-by-mint-call: a handler under src/mcp/ that
+# mints its own context must fail here, not just at the type layer.
 if grep -rnE "function mintTenantContext|TenantContext = \{|tenantBrand" src --include="*.ts" | grep -v "^src/tenancy/"; then
   echo "FAIL I2: tenant-context construction escapes the tenancy layer"
   fail=1
+elif grep -rnE "mintTenantContext\s*\(" src --include="*.ts" | grep -v "^src/tenancy/" | grep -v "^src/http/server.ts"; then
+  echo "FAIL I2: mintTenantContext called outside the tenancy layer (only src/http/server.ts may call it)"
+  fail=1
 else
-  echo "ok I2: tenant-context construction confined to src/tenancy/"
+  echo "ok I2: tenant-context construction confined to src/tenancy/ (middleware call site whitelisted)"
 fi
 
 # I3 — list_tools must be manifest-driven (N-3 / §6.5: descriptions authoritative).

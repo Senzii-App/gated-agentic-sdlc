@@ -33,6 +33,11 @@ The AsyncLocalStorage frame is set in the same request lifecycle as `transport.h
 1. **Red commit (g3 lock):** ADR + type layer (ids, tenant, claims, adapter interface, request-identity storage, fail-closed config, manifest registry verbatim from production, server wiring) + adapters as explicit `UnitNotImplemented` stubs + ALL suites. Runtime suites fail red by design (fail-closed 401 on every credential — nothing is implemented); type-level + manifest-parity suites pass.
 2. **Green commit:** adapter implementations (jwt/api-key/dev-token) + pg pool wiring + seeded branched template databases → all suites green.
 
+### g3 lock addendum — lock revised at green (2026-10-19)
+
+- AC-12 hardened to the spec's 60 interleaved alternating-token calls (red commit had 5 same-token calls); revocation fixture corrected to seed into the branch DB (red commit seeded into the `postgres` admin DB).
+- Both `typeLevel/*.test-d.ts` files restructured; no assertion weakened — all changes moved toward SPEC-001 v1.2. The locked suite is the green commit's, not `77beedd`'s file-for-file.
+
 ## Consequences
 
 - The authZ matrix generates from the registry (28 tools today); each later unit that lands handlers extends the matrix's landed-section — suite files stay immutable within the unit; growth is additive.
