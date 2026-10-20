@@ -237,18 +237,14 @@ properties = {}
 [[tool]]
 name = "create_work_site"
 handler = "work_sites.create_work_site"
-description = "Create a new work site (a location where shifts happen)."
+description = "Create a new work site (a location where shifts happen). Address is required: geo coordinates (lat/long) are not accepted as inputs — the server geocodes the address and records the resolved coordinates on the work site row (matching's proximity score depends on them)."
 [tool.input_schema]
 type = "object"
-required = ["name"]
+required = ["name", "address"]
 [tool.input_schema.properties.name]
 type = "string"
 [tool.input_schema.properties.address]
 type = "string"
-[tool.input_schema.properties.latitude]
-type = "number"
-[tool.input_schema.properties.longitude]
-type = "number"
 [tool.input_schema.properties.required_skills]
 type = "array"
 items = { type = "string" }

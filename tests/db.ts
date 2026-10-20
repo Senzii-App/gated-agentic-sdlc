@@ -35,7 +35,10 @@ export const CORE_MIGRATIONS: readonly string[] = [
   CREATE TABLE work_sites (
     id serial PRIMARY KEY,
     organization_id integer NOT NULL REFERENCES organizations(id),
-    name text NOT NULL
+    name text NOT NULL,
+    address text NOT NULL,
+    latitude double precision,
+    longitude double precision
   );
 
   CREATE TABLE clients (
