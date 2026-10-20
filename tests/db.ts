@@ -55,6 +55,9 @@ export const CORE_MIGRATIONS: readonly string[] = [
     organization_id integer NOT NULL REFERENCES organizations(id),
     name text NOT NULL,
     email text NOT NULL,
+    address text NOT NULL,
+    latitude double precision,
+    longitude double precision,
     timezone text NOT NULL DEFAULT 'UTC'
   );
 

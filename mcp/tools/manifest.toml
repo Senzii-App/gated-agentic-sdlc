@@ -26,10 +26,10 @@ description = "Staff member ID"
 [[tool]]
 name = "create_staff"
 handler = "staff.create_staff"
-description = "Create a new staff member with optional certifications. Call list_certifications first to get valid certification names."
+description = "Create a new staff member with optional certifications. Address is required: geo coordinates (lat/long) are not accepted as inputs — the server geocodes the address and records the resolved coordinates on the staff row. Call list_certifications first to get valid certification names."
 [tool.input_schema]
 type = "object"
-required = ["name", "email", "timezone"]
+required = ["name", "email", "timezone", "address"]
 [tool.input_schema.properties.name]
 type = "string"
 [tool.input_schema.properties.email]
@@ -38,10 +38,6 @@ type = "string"
 type = "string"
 [tool.input_schema.properties.address]
 type = "string"
-[tool.input_schema.properties.latitude]
-type = "number"
-[tool.input_schema.properties.longitude]
-type = "number"
 [tool.input_schema.properties.timezone]
 type = "string"
 [tool.input_schema.properties.certifications]
