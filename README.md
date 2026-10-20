@@ -70,9 +70,9 @@ Synthetic tenants only. No production data, no credentials, no PHI/PII — not i
 
 ## Status
 
-- [ ] Charter + operating model published (g1)
-- [ ] SPEC-001 frozen (g2)
-- [ ] AuthZ matrix + session-identity tests locked red (g3)
+- [x] Charter + operating model published (g1)
+- [x] SPEC-001 frozen (g2) — v1.2 (Delta-01: TypeScript port · Delta-02: conformance audit · Delta-03: test storage contract)
+- [x] AuthZ matrix + session-identity tests locked red (g3) — unit/m1-tenancy-core
 - [ ] M1: tenant-injection core (design ADR + security review at g4)
 - [ ] M1: tool surface units — matching → assignments → staff → requests → metrics
 - [ ] Scorecard instrumented (first-pass alignment, steering cost, time-to-green)
